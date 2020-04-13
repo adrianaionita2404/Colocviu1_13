@@ -2,6 +2,8 @@ package ro.pub.cs.systems.eim.Colocviu1_13;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -54,5 +56,31 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
 
         savedInstanceState.putString(Constants.CARD_TEXT, allTextView.getText().toString());
         savedInstanceState.putString(Constants.CARD_CNT, countCard.toString());
+    }
+
+    public void gotoNextAct(View view) {
+        TextView allTextView = (TextView) findViewById(R.id.text_dir);
+
+        Intent intent = new Intent(this, Colocviu1_13SecondaryActivity.class);
+        intent.putExtra("ro.pub.cs.systems.eim.Colocviu1_13.TEXT_CARD", allTextView.getText().toString());
+        startActivityForResult(intent, Constants.REQ_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        switch (requestCode) {
+            case Constants.REQ_CODE:
+                TextView allTextView = (TextView) findViewById(R.id.text_dir);
+
+                allTextView.setText("");
+                countCard = 0;
+
+                if (resultCode == Activity.RESULT_OK)
+                    Toast.makeText(this, "Returned ok", Toast.LENGTH_LONG).show();
+                else if (resultCode == Activity.RESULT_CANCELED)
+                    Toast.makeText(this, "Canceled", Toast.LENGTH_LONG).show();
+                break;
+        }
     }
 }
