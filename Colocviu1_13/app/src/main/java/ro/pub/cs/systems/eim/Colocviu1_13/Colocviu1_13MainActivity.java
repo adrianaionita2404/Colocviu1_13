@@ -3,7 +3,9 @@ package ro.pub.cs.systems.eim.Colocviu1_13;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +16,10 @@ import android.widget.Toast;
 public class Colocviu1_13MainActivity extends AppCompatActivity {
     private Integer countCard = 0;
 
+    public Colocviu1_13BcastRcv bcastr;
+    public IntentFilter startedServiceIntentFilter;
+
+    public boolean ok = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +36,53 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Restored state: " + countCard + " (card count)", Toast.LENGTH_LONG).show();
             }
         }
+
+        if (countCard == 4) {
+            TextView allTextView = (TextView) findViewById(R.id.text_dir);
+
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("ro.pub.cs.systems.eim.Colocviu1_13", "ro.pub.cs.systems.eim.Colocviu1_13.Colocviu1_13Service"));
+            intent.putExtra("ro.pub.cs.systems.eim.Colocviu1_13.allCards", allTextView.getText().toString());
+            startService(intent);
+            Toast.makeText(this, "Started service", Toast.LENGTH_LONG).show();
+
+            bcastr = new Colocviu1_13BcastRcv();
+
+            startedServiceIntentFilter = new IntentFilter();
+            startedServiceIntentFilter.addAction(Constants.ACTION_TYPE);
+            ok = true;
+        }
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (ok == true) {
+            registerReceiver(bcastr, startedServiceIntentFilter);
+        }
+    }
+
+    protected void onPause() {
+        if (ok == true) {
+            unregisterReceiver(bcastr);
+        }
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (ok == true) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("ro.pub.cs.systems.eim.Colocviu1_13", "ro.pub.cs.systems.eim.Colocviu1_13.Colocviu1_13Service"));
+            stopService(intent);
+            ok = false;
+        }
+
+        super.onDestroy();
     }
 
     public void concatDir(View view) {
